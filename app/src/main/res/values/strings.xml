@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">LifeTrack</string>
+    <string name="button_add">Add button</string>
+    <string name="cancel">Cancel</string>
+    <string name="done">Done</string>
+    <string name="add_new_task">Add new task</string>
+    <string name="back_to_list">Back to task list</string>
+    <string name="add_task_success">Task has been added!</string>
+    <string name="tasks_of_the_week">Your tasks of the week</string>
+    <string name="no_tasks_message">You don\'t have any tasks</string>
+    <string name="see_all">See all…</string>
+    <string name="task_priority">Task priority</string>
+    <string name="priority">Priority</string>
+    <string name="due_date">Due date</string>
+</resources>
