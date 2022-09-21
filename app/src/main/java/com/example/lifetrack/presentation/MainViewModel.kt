@@ -69,22 +69,24 @@ class MainViewModel @Inject constructor(
         val todayString =
             LocalDate.now().format(DateTimeFormatter.ofPattern(TODAY_DATE_FORMAT, Locale.ENGLISH))
 
-        _todayDate.value = todayString.split(" ")
-            .joinToString(separator = " ") { it.capitalize() }
-            .replace(oldValue = ".", newValue = "")
+        _todayDate.update {
+            todayString.split(" ")
+                .joinToString(separator = " ") { it.capitalize() }
+                .replace(oldValue = ".", newValue = "")
+        }
     }
 
     private fun getTasks() = getUpcomingTasks()
         .onEach { result ->
-            _tasksList.value = result
+            _tasksList.update { result }
         }
         .flowOn(Dispatchers.IO)
         .launchIn(viewModelScope)
 
     private fun clearTaskFields() {
-        _taskName.value = ""
-        _selectedDate.value = LocalDate.now()
-        _selectedTasksPriority.value = TaskPriority.LowPriority
+        _taskName.update { "" }
+        _selectedDate.update { LocalDate.now() }
+        _selectedTasksPriority.update { TaskPriority.LowPriority }
     }
 
     fun onTaskNameChanged(newName: String) {
@@ -92,34 +94,34 @@ class MainViewModel @Inject constructor(
     }
 
     fun onDateSelected(newDate: LocalDate) {
-        _selectedDate.value = newDate
-        _isCalendarVisible.value = false
+        _selectedDate.update { newDate }
+        _isCalendarVisible.update { false }
     }
 
     fun onSelectPriority(priority: TaskPriority) {
-        _selectedTasksPriority.value = priority
+        _selectedTasksPriority.update { priority }
     }
 
     fun toggleCalendar() {
-        _isCalendarVisible.value = !_isCalendarVisible.value
+        _isCalendarVisible.update { !it }
     }
 
     fun togglePriority() {
-        _isPriorityVisible.value = !isPriorityVisible.value
+        _isPriorityVisible.update { !it }
     }
 
     fun createTask() {
         viewModelScope.launch(Dispatchers.IO) {
             when(val result = saveTask(taskName.value, selectedDate.value, selectedPriority.value)) {
                 Resource.Success -> {
-                    _taskAddState.value = result
+                    _taskAddState.update { result }
                     clearTaskFields()
                 }
-                is Resource.Failure -> _taskAddState.value = result
+                is Resource.Failure -> _taskAddState.update { result }
                 Resource.Idle -> Unit
             }
             delay(timeMillis = TASK_RESULT_MESSAGE_TIMEOUT)
-            _taskAddState.value = Resource.Idle
+            _taskAddState.update { Resource.Idle }
         }
     }
 
