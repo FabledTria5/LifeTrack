@@ -102,7 +102,7 @@ fun WeekTasksCard(
                     onClick = onTaskChecked
                 )
                 AnimatedVisibility(
-                    visible = !isListOpened,
+                    visible = !isListOpened && tasksList.size > 1,
                     exit = fadeOut(animationSpec = tween(durationMillis = 100))
                 ) {
                     TextButton(

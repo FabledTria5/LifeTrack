@@ -1,13 +1,29 @@
 package com.example.lifetrack.presentation.ui.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -30,19 +46,22 @@ import com.example.lifetrack.presentation.ui.theme.Green
 import com.example.lifetrack.presentation.ui.theme.Pink
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Locale
 
+@ExperimentalFoundationApi
 @ExperimentalMaterial3Api
 @Composable
 fun BottomSheetContent(
+    modifier: Modifier = Modifier,
     taskName: String,
     onTaskNameChanged: (String) -> Unit,
+    onTaskNameDone: () -> Unit,
     selectedDate: LocalDate,
     onSelectDateClicked: () -> Unit,
     selectedTasksPriority: TaskPriority,
     onSelectRepeatModeClicked: () -> Unit,
     onCreateTaskClicked: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val formattedDate by remember(selectedDate) {
         derivedStateOf {
@@ -55,9 +74,7 @@ fun BottomSheetContent(
     }
 
     Column(
-        modifier = Modifier
-            .padding(horizontal = 30.dp, vertical = 10.dp)
-            .fillMaxWidth(),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(
@@ -78,6 +95,9 @@ fun BottomSheetContent(
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.Sentences,
                 imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = { onTaskNameDone() }
             ),
             singleLine = true,
             colors = TextFieldDefaults.outlinedTextFieldColors(

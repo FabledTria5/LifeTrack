@@ -37,7 +37,7 @@ fun CalendarDialog(
     onSubmitDateClicked: (LocalDate) -> Unit,
     onCancelClicked: () -> Unit
 ) {
-    val calendarState = rememberSelectableCalendarState()
+    val calendarState = rememberSelectableCalendarState(initialSelection = listOf(LocalDate.now()))
     val selectionState = calendarState.selectionState
 
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }

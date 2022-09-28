@@ -6,26 +6,48 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,7 +60,11 @@ import com.example.lifetrack.R
 import com.example.lifetrack.domain.model.Resource
 import com.example.lifetrack.domain.model.TaskType
 import com.example.lifetrack.presentation.MainViewModel
-import com.example.lifetrack.presentation.ui.components.*
+import com.example.lifetrack.presentation.ui.components.BottomSheetContent
+import com.example.lifetrack.presentation.ui.components.CalendarDialog
+import com.example.lifetrack.presentation.ui.components.DayTasksCard
+import com.example.lifetrack.presentation.ui.components.PriorityDialog
+import com.example.lifetrack.presentation.ui.components.WeekTasksCard
 import com.example.lifetrack.presentation.ui.theme.Green
 import com.example.lifetrack.presentation.ui.theme.Pink
 import kotlinx.coroutines.launch
@@ -47,11 +73,13 @@ import kotlinx.coroutines.launch
     ExperimentalMaterialApi::class,
     ExperimentalMaterial3Api::class,
     ExperimentalLifecycleComposeApi::class,
-    ExperimentalComposeUiApi::class
+    ExperimentalComposeUiApi::class,
+    ExperimentalFoundationApi::class
 )
 @Composable
 fun MainScreen(mainViewModel: MainViewModel) {
     val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
 
     val taskAddState by mainViewModel.taskAddState.collectAsStateWithLifecycle()
     val todayDate by mainViewModel.todayDate.collectAsStateWithLifecycle()
@@ -79,8 +107,16 @@ fun MainScreen(mainViewModel: MainViewModel) {
 
     val bottomSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
-        animationSpec = tween(durationMillis = 500)
+        animationSpec = tween(durationMillis = 500),
+        confirmStateChange = {
+            focusManager.clearFocus()
+            true
+        }
     )
+
+    val taskNameDone = remember(focusManager) {
+        { focusManager.clearFocus() }
+    }
 
     val createTask = remember(mainViewModel) {
         {
@@ -101,11 +137,16 @@ fun MainScreen(mainViewModel: MainViewModel) {
     ModalBottomSheetLayout(
         sheetContent = {
             BottomSheetContent(
+                modifier = Modifier
+                    .padding(horizontal = 30.dp, vertical = 10.dp)
+                    .imePadding()
+                    .fillMaxWidth(),
                 taskName = taskName,
                 selectedDate = selectedDate,
                 selectedTasksPriority = selectedRepeatMode,
                 onSelectDateClicked = mainViewModel::toggleCalendar,
                 onTaskNameChanged = mainViewModel::onTaskNameChanged,
+                onTaskNameDone = taskNameDone,
                 onSelectRepeatModeClicked = mainViewModel::togglePriority,
                 onCreateTaskClicked = createTask,
                 onDismiss = bottomSheetDismiss
@@ -145,7 +186,7 @@ fun MainScreen(mainViewModel: MainViewModel) {
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState()),
             ) {
-                Header(
+                DateHeader(
                     modifier = Modifier
                         .padding(vertical = 10.dp)
                         .fillMaxWidth()
@@ -272,7 +313,7 @@ fun TopBar(taskAddState: Resource) {
 }
 
 @Composable
-fun Header(modifier: Modifier = Modifier, todayDate: String) {
+fun DateHeader(modifier: Modifier = Modifier, todayDate: String) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.SpaceBetween
